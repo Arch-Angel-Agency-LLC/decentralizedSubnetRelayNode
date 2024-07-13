@@ -1,0 +1,44 @@
+- name: Configure MeshNet Node
+  hosts: localhost
+  tasks:
+    - name: Ensure Nginx is installed on Linux
+      apt:
+        name: nginx
+        state: present
+      become: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure Nginx is installed on macOS
+      community.general.homebrew:
+        name: nginx
+        state: present
+      when: ansible_os_family == "Darwin"
+
+    - name: Install Docker on Linux
+      apt:
+        name: docker.io
+        state: present
+      become: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install Docker on macOS
+      community.general.homebrew:
+        name: docker
+        state: present
+      when: ansible_os_family == "Darwin"
+
+    - name: Start and enable Docker service on Linux
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+      become: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Run a sample container
+      community.docker.docker_container:
+        name: my_nginx
+        image: nginx
+        state: started
+        ports:
+          - "80:80"
